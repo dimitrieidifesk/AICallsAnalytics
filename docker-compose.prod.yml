@@ -1,0 +1,14 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    restart: always
+    command: bash ./start.sh
+    env_file:
+      - $REMOTE_PROJECT_DIR/..env
+    volumes:
+      - ./:/app
+
+volumes:
+    backend:

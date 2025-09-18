@@ -1,0 +1,56 @@
+services:
+  backend:
+    container_name: ai_calls_analytics_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: bash ./start.sh
+    env_file:
+      - ..env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  redis:
+    image: redis:latest
+    container_name: ai_calls_analytics_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  db:
+    container_name: ai_calls_analytics_db
+    image: postgres
+    command: -c 'max_connections=200'
+    env_file:
+      - ..env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: base_db
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  backend:
+  redis_data:
+  db:
