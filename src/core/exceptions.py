@@ -28,3 +28,24 @@ class ExceptionCallSessionNotFound(CustomException):
         self.status_code = HTTPStatus.BAD_REQUEST
         self.message = "Error when receiving an CallSession by session_id."
         self.code = "Error when receiving an CallSession by session_id."
+
+
+class ExceptionWhenDownloadAudio(CustomException):
+    def __init__(self, message: str) -> None:
+        self.status_code = HTTPStatus.BAD_REQUEST
+        self.message = f"Failed to download audio: {message}"
+        self.code = f"Failed to download audio: {message}"
+
+
+class ExceptionTranscriptionAPI(CustomException):
+    def __init__(self, message: str) -> None:
+        self.status_code = HTTPStatus.BAD_REQUEST
+        self.message = f"Transcription API error: {message}"
+        self.code = f"Transcription API error: {message}"
+
+
+class ExceptionTranscriptionFailed(CustomException):
+    def __init__(self, message: str) -> None:
+        self.status_code = HTTPStatus.BAD_REQUEST
+        self.message = f"Transcription failed: {message}"
+        self.code = f"Transcription failed: {message}"

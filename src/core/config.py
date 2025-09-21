@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Literal
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, HttpUrl
 from pydantic import PostgresDsn
 from pydantic_settings import (
     BaseSettings,
@@ -77,17 +77,21 @@ class RedisConfig(BaseModel):
     token_db: int = 1
 
 
-class UserCredential(BaseModel):
+class UserCredentialConfig(BaseModel):
     username: str
     password: str
 
 
-class CommonConfig(BaseModel):
-    chat_count_limit: int = 60 * 60 * 24
-    telegram_client_settings_expire: int = 60 * 60 * 24
-    days_limit_of_parsing: int = 30
-    env: str = "local"
-    tg_own_ids: list[int] = [777000]
+class OpenAiConfig(BaseModel):
+    api_key: str
+    base_url: HttpUrl
+    whisper_model: str
+    proxy_url: HttpUrl
+    language_code: str = "ru"
+
+    @property
+    def audio_transcription_url(self) -> str:
+        return str(self.base_url).strip("/") + "/audio/transcriptions"
 
 
 class Settings(BaseSettings):
@@ -100,14 +104,15 @@ class Settings(BaseSettings):
     )
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
-    common: CommonConfig = CommonConfig()
     db: DatabaseConfig
     db_redis: RedisConfig = RedisConfig()
-    user_credential: UserCredential
+    user_credential: UserCredentialConfig
+    open_ai: OpenAiConfig
     gunicorn: GunicornConfig = GunicornConfig()
     logging: LoggingConfig = LoggingConfig()
     version: str = "0.1.0"
-    env: str = "local"
+    env: str
+    domain: str
     default_timezone: str = "UTC"
 
 
