@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import declared_attr
 
 from src.core.config import settings
-from src.misc.case_converter import to_camel
+from src.misc.case_converter import to_snake
 
 
 class Base(DeclarativeBase):
@@ -15,4 +15,4 @@ class Base(DeclarativeBase):
 
     @declared_attr.directive
     def __tablename__(cls) -> str:
-        return f"{to_camel(cls.__name__)}s"
+        return f"{to_snake(cls.__name__)}s"

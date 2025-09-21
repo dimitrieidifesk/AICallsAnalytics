@@ -47,6 +47,7 @@ class LoggingConfig(BaseModel):
 class ApiV1Prefix(BaseModel):
     prefix: str = "/v1"
     common: str = "/common"
+    call_session: str = "/call_session"
 
 
 class ApiPrefix(BaseModel):
@@ -70,37 +71,15 @@ class DatabaseConfig(BaseModel):
     }
 
 
-class DatabaseTestConfig(BaseModel):
-    url: PostgresDsn
-    echo: bool = False
-    echo_pool: bool = False
-    pool_size: int = 50
-    max_overflow: int = 10
-
-    naming_convention: dict[str, str] = {
-        "ix": "ix_%(column_0_label)s",
-        "uq": "uq_%(table_name)s_%(column_0_N_name)s",
-        "ck": "ck_%(table_name)s_%(constraint_name)s",
-        "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-        "pk": "pk_%(table_name)s",
-    }
-
-
 class RedisConfig(BaseModel):
     host: str = "redis"
     port: int = 6379
     token_db: int = 1
 
 
-class AuthConfig(BaseModel):
-    secret_key: str = "some_secret_key"
-    algorithm: str = "HS256"
-    access_token_expires_minutes: int = 30
-    refresh_token_expires_minutes: int = 60 * 24 * 7
-    token_type_field: str = "type"
-    access_token_type: str = "access"
-    refresh_token_type: str = "refresh"
-    refresh_token_expire_days: int = 30
+class UserCredential(BaseModel):
+    username: str
+    password: str
 
 
 class CommonConfig(BaseModel):
@@ -123,9 +102,8 @@ class Settings(BaseSettings):
     api: ApiPrefix = ApiPrefix()
     common: CommonConfig = CommonConfig()
     db: DatabaseConfig
-    db_test: DatabaseTestConfig
     db_redis: RedisConfig = RedisConfig()
-    auth: AuthConfig = AuthConfig()
+    user_credential: UserCredential
     gunicorn: GunicornConfig = GunicornConfig()
     logging: LoggingConfig = LoggingConfig()
     version: str = "0.1.0"
