@@ -85,13 +85,20 @@ class UserCredentialConfig(BaseModel):
 class OpenAiConfig(BaseModel):
     api_key: str
     base_url: HttpUrl
+    transcription_path: str
+    chat_path: str
     whisper_model: str
+    chat_model: str
     proxy_url: HttpUrl
     language_code: str = "ru"
 
     @property
     def audio_transcription_url(self) -> str:
-        return str(self.base_url).strip("/") + "/audio/transcriptions"
+        return str(self.base_url).strip("/") + self.transcription_path
+
+    @property
+    def chat_gpt_url(self) -> str:
+        return str(self.base_url).strip("/") + self.chat_path
 
 
 class Settings(BaseSettings):

@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 
 from src.api.api_v1.schemas.call_session import CallSessionCreateSchema, CallSessionAnalysisResponseSchema
 from src.api.dependencies.getter import CallSessionServiceDep
@@ -14,9 +14,10 @@ async def create_call_session(
     _: VerifyUser,
     data: CallSessionCreateSchema,
     service: CallSessionServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> None:
 
-    return await service.create_new_call_session(data)
+    return await service.create_new_call_session(data, background_tasks)
 
 
 @router.get("/analysis/{session_id}")

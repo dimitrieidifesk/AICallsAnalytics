@@ -7,7 +7,6 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from loguru import logger
 
-from src.api.api_v1.schemas.call_session import CallSessionCreateSchema
 from src.core.exceptions import (
     ExceptionWhenCreatingCallSessionRecord,
     ExceptionWhenUpdatingCallSessionRecord
@@ -20,8 +19,8 @@ class CallSessionRepository(BaseRepository[CallSession]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, CallSession)
 
-    async def create(self, data: CallSessionCreateSchema) -> CallSession:
-        call_session = self.model(**data.model_dump())
+    async def create(self, data: dict[str, Any]) -> CallSession:
+        call_session = self.model(**data)
         call_session.id = uuid.uuid4()
         self.session.add(call_session)
         try:

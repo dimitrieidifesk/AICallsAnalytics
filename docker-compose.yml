@@ -7,7 +7,7 @@ services:
     restart: always
     command: bash ./start.sh
     env_file:
-      - ..env
+      - .env
     ports:
       - "8000:8000"
     volumes:
@@ -37,7 +37,7 @@ services:
     image: postgres
     command: -c 'max_connections=200'
     env_file:
-      - ..env
+      - .env
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword

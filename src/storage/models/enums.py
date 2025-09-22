@@ -20,3 +20,8 @@ class LeadQuality(StrEnum):
 class RequestTypeOpenAi(StrEnum):
     TRANSCRIPTION = "TRANSCRIPTION"
     ANALYTIC = "ANALYTIC"
+
+
+class PromtMessageRole(StrEnum):
+    SYSTEM = "system"
+    USER = "user"

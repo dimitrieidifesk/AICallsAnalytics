@@ -90,6 +90,6 @@ class MetadataSchema(BaseSchema):
 
 class CallSessionAnalysisResponseSchema(BaseSchema):
     session_id: str
-    transcription: ...
+    # transcription: ...
     analysis: AnalysisResponseSchema
     metadata: MetadataSchema

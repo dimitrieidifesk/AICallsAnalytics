@@ -17,8 +17,8 @@ class CallSession(Base, IdUUIDPkMixin, CreatedMixin, UpdatedMixin):
     is_sales_line: Mapped[bool] = mapped_column(Boolean)
     is_first_call: Mapped[bool] = mapped_column(Boolean)
     script: Mapped[dict] = mapped_column(JSON)
-    transcription: Mapped[dict] = mapped_column(JSON)
-    analysis: Mapped[dict] = mapped_column(JSON)
+    transcription: Mapped[dict] = mapped_column(JSON, nullable=True)
+    analysis: Mapped[dict] = mapped_column(JSON, nullable=True)
     status: Mapped[CallSessionStatus] = mapped_column(
         Enum(CallSessionStatus, values_callable=lambda x: [e.value for e in CallSessionStatus]),
         name="type_campaign",
