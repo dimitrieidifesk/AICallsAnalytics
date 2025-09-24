@@ -25,3 +25,12 @@ class RequestTypeOpenAi(StrEnum):
 class PromtMessageRole(StrEnum):
     SYSTEM = "system"
     USER = "user"
+
+
+class TaskStatus(StrEnum):
+    PENDING = "pending"
+    STARTED = "started"
+    RETRY = "retry"
+    SUCCESS = "success"
+    FAILURE = "failure"
+

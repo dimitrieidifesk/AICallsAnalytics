@@ -71,10 +71,15 @@ class DatabaseConfig(BaseModel):
     }
 
 
-class RedisConfig(BaseModel):
-    host: str = "redis"
-    port: int = 6379
-    token_db: int = 1
+class RabbitConfig(BaseModel):
+    host: str
+    port: str
+    user: str
+    password: str
+
+    @property
+    def url(self) -> str:
+        return f"amqp://{self.user}:{self.password}@{self.host}:{self.port}"
 
 
 class UserCredentialConfig(BaseModel):
@@ -112,9 +117,9 @@ class Settings(BaseSettings):
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
     db: DatabaseConfig
-    db_redis: RedisConfig = RedisConfig()
     user_credential: UserCredentialConfig
     open_ai: OpenAiConfig
+    rabbit: RabbitConfig
     gunicorn: GunicornConfig = GunicornConfig()
     logging: LoggingConfig = LoggingConfig()
     version: str = "0.1.0"

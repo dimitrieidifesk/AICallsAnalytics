@@ -1,4 +1,4 @@
-from typing import BinaryIO
+from typing import BinaryIO, Any
 
 import aiohttp
 
@@ -8,18 +8,18 @@ from pydantic import HttpUrl
 from src.api.api_v1.schemas.open_ai import StructureTextRequestSchema, PromtMessageSchema
 from src.core.config import settings
 from src.core.exceptions import ExceptionTranscriptionAPI, ExceptionTranscriptionFailed
-from src.core.promts import MAKING_STRUCTURE_SYSTEM_PROMT, MAKING_STRUCTURE_USER_PROMT, raw_transcript
+from src.core.promts import MAKING_STRUCTURE_SYSTEM_PROMT, MAKING_STRUCTURE_USER_PROMT
 from src.services.audio import AudioService
 from src.storage.models.enums import PromtMessageRole
 
 
-class OpenAITranscriptionService:
+class OpenAIService:
     def __init__(self, audio_url: HttpUrl):
         self.proxy_url = str(settings.open_ai.proxy_url)
         self._audio_service = AudioService(str(audio_url))
         self._headers = {"Authorization": f"Bearer {settings.open_ai.api_key}"}
 
-    async def _get_raw_transcription_from_buffer(self, audio_buffer: BinaryIO, filename: str) -> str:
+    async def get_raw_transcription_from_buffer(self, audio_buffer: BinaryIO, filename: str) -> str:
         data = aiohttp.FormData()
         data.add_field('file', audio_buffer, filename=filename, content_type='audio/mpeg')
         data.add_field('model', settings.open_ai.whisper_model)
@@ -38,13 +38,11 @@ class OpenAITranscriptionService:
                 else:
                     raise Exception(f"Whisper failed: {response.status}")
 
-    async def _structure_text_with_chatgpt(self, text: str) -> str:
+    async def structure_text_with_chatgpt(self, text: str) -> str:
         data = StructureTextRequestSchema(
             messages=[
                 PromtMessageSchema(role=PromtMessageRole.SYSTEM, content=MAKING_STRUCTURE_SYSTEM_PROMT),
-                PromtMessageSchema(
-                    role=PromtMessageRole.USER, content=MAKING_STRUCTURE_USER_PROMT.format(text=raw_transcript)
-                )
+                PromtMessageSchema(role=PromtMessageRole.USER, content=MAKING_STRUCTURE_USER_PROMT.format(text=text))
             ]
         )
         try:
@@ -53,8 +51,7 @@ class OpenAITranscriptionService:
                 async with session.post(
                     settings.open_ai.chat_gpt_url,
                     json=data.model_dump(),
-                    proxy=self.proxy_url,
-                    ssl=False
+                    proxy=self.proxy_url
                 ) as response:
                     result = await response.json()
                     if response.status != 200:
@@ -67,20 +64,21 @@ class OpenAITranscriptionService:
             logger.error(f"Network error during transcription: {str(e)}")
             raise ExceptionTranscriptionFailed(str(e))
 
-    async def transcribe_from_url(self) -> str | None:
+    async def text_transcription_from_url(self) -> str | None:
         audio_buffer = await self._audio_service.download_audio_from_s3_to_buffer()
         try:
-            text_transcription = await self._get_raw_transcription_from_buffer(
+            text_transcription = await self.get_raw_transcription_from_buffer(
                 audio_buffer, self._audio_service.filename
             )
-            transcription =  await self._structure_text_with_chatgpt(text_transcription)
-            logger.info(f"Transcription completed: {transcription}")
         except Exception as e:
             logger.error(f"Transcription failed: {str(e)}")
             return
         else:
-            return transcription
+            return text_transcription
         finally:
             audio_buffer.close()
 
-
+    async def analyze_structured_text(
+        self, structure_text: dict[str, str], analysis: dict[str, str]
+    ) -> dict[Any, Any]:
+        ...
