@@ -2,7 +2,7 @@ import json
 
 from loguru import logger
 
-from src.services.open_ai import OpenAIService
+from src.processing_worker.service.open_ai import OpenAIService
 from src.storage.models.db_helper import db_connector
 from src.storage.models.enums import CallSessionStatus
 from src.storage.repositories.call_session import CallSessionRepository

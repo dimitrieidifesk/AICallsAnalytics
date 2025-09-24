@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.api_v1.schemas.call_session import CallSessionCreateSchema, CallSessionAnalysisResponseSchema
 from src.core.exceptions import ExceptionCallSessionNotFound
+from src.integrations.broker.rabbit_broker import broker
+from src.integrations.broker.schemas import CallSessionProcessingSchema
 from src.storage.repositories.call_session import CallSessionRepository
 
 
@@ -17,8 +19,9 @@ class CallSessionService:
         data_dict["script"] = data.script.model_dump()
         data_dict["recording_url"] = str(data.call.recording_url)
         call_session = await self._repository.create(data_dict)
-
-        return
+        await broker.publish(
+            CallSessionProcessingSchema(call_session_id=call_session.id)
+        )
 
     async def get_call_session_analysis(self, session_id: str) -> CallSessionAnalysisResponseSchema:
         call_session = await self._repository.get_call_session_by_session_id(session_id)

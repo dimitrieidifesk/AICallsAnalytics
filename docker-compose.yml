@@ -13,8 +13,6 @@ services:
     volumes:
       - ./:/app
     depends_on:
-      redis:
-        condition: service_healthy
       db:
         condition: service_healthy
 
@@ -46,7 +44,16 @@ services:
       timeout: 10s
       retries: 5
 
+  queue:
+    container_name: queue
+    restart: always
+    command: bash ./queue_start.sh
+    env_file:
+      - .env
+    build:
+      dockerfile: Dockerfile_queue
+      context: .
+
 volumes:
   backend:
-  redis_data:
   db:

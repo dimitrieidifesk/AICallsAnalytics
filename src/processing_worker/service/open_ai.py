@@ -5,7 +5,7 @@ import aiohttp
 from loguru import logger
 from pydantic import HttpUrl
 
-from src.api.api_v1.schemas.open_ai import StructureTextRequestSchema, PromtMessageSchema
+from src.processing_worker.schema.open_ai import StructureTextRequestSchema, PromtMessageSchema
 from src.core.config import settings
 from src.core.exceptions import ExceptionTranscriptionAPI, ExceptionTranscriptionFailed
 from src.core.promts import MAKING_STRUCTURE_SYSTEM_PROMT, MAKING_STRUCTURE_USER_PROMT
