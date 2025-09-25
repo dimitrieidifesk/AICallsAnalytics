@@ -2,7 +2,11 @@ from http import HTTPStatus
 
 from fastapi import APIRouter
 
-from src.api.api_v1.schemas.call_session import CallSessionCreateSchema, CallSessionAnalysisResponseSchema
+from src.api.api_v1.schemas.call_session import (
+    CallSessionCreateSchema,
+    CallSessionAnalysisResponseSchema,
+    TranscriptionCallSessionResponseSchema
+)
 from src.api.dependencies.getter import CallSessionServiceDep
 from src.api.dependencies.verify_user import VerifyUser
 
@@ -26,7 +30,7 @@ async def get_call_session_analysis(
     service: CallSessionServiceDep,
 ) -> CallSessionAnalysisResponseSchema:
 
-    return service.get_call_session_analysis(session_id)
+    return await service.get_call_session_analysis(session_id)
 
 
 @router.get("/transcription/{session_id}")
@@ -34,6 +38,6 @@ async def get_call_session_transcription(
     _: VerifyUser,
     session_id: str,
     service: CallSessionServiceDep,
-) -> None:
+) -> TranscriptionCallSessionResponseSchema:
 
     return await service.get_call_session_transcription(session_id)

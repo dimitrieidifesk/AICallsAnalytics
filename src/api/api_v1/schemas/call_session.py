@@ -88,8 +88,13 @@ class MetadataSchema(BaseSchema):
     analysis_version: str = "1.2.0"
 
 
+class TranscriptionCallSessionResponseSchema(BaseSchema):
+    transcription: list[dict[str, str]]
+
+
 class CallSessionAnalysisResponseSchema(BaseSchema):
     session_id: str
     # transcription: ...
     analysis: AnalysisResponseSchema
     metadata: MetadataSchema
+

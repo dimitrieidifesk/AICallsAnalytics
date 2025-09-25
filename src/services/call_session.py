@@ -2,7 +2,11 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.api_v1.schemas.call_session import CallSessionCreateSchema, CallSessionAnalysisResponseSchema
+from src.api.api_v1.schemas.call_session import (
+    CallSessionCreateSchema,
+    CallSessionAnalysisResponseSchema,
+    TranscriptionCallSessionResponseSchema
+)
 from src.core.exceptions import ExceptionCallSessionNotFound
 from src.integrations.broker.rabbit_broker import broker
 from src.integrations.broker.schemas import CallSessionProcessingSchema
@@ -31,10 +35,10 @@ class CallSessionService:
         # TODO: Здесь необходимо реализовать обработку статуса.
         return ...
 
-    async def get_call_session_transcription(self, session_id: str) -> None:
+    async def get_call_session_transcription(self, session_id: str) -> TranscriptionCallSessionResponseSchema:
         call_session = await self._repository.get_call_session_by_session_id(session_id)
         if not call_session:
             raise ExceptionCallSessionNotFound
 
         # TODO: Здесь необходимо реализовать обработку статуса.
-        return
+        return TranscriptionCallSessionResponseSchema(transcription=call_session.transcription.get("data"))

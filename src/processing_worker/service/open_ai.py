@@ -7,8 +7,13 @@ from pydantic import HttpUrl
 
 from src.processing_worker.schema.open_ai import StructureTextRequestSchema, PromtMessageSchema
 from src.core.config import settings
-from src.core.exceptions import ExceptionTranscriptionAPI, ExceptionTranscriptionFailed
-from src.core.promts import MAKING_STRUCTURE_SYSTEM_PROMT, MAKING_STRUCTURE_USER_PROMT
+from src.core.exceptions import ExceptionTranscriptionAPI, ExceptionOpenAiFailed
+from src.core.prompts import (
+    MAKING_STRUCTURE_SYSTEM_PROMPT,
+    MAKING_STRUCTURE_USER_PROMPT,
+    MAKING_ANALYZES_SYSTEM_PROMPT,
+    MAKING_ANALYZES_USER_PROMPT, REQUIRED_JSON_OUTPUT_FORMAT
+)
 from src.services.audio import AudioService
 from src.storage.models.enums import PromtMessageRole
 
@@ -36,13 +41,15 @@ class OpenAIService:
                     result = await response.json()
                     return result.get('text', '')
                 else:
-                    raise Exception(f"Whisper failed: {response.status}")
+                    error_text = f"Whisper failed: {response.status}"
+                    logger.error(error_text)
+                    raise ExceptionOpenAiFailed(error_text)
 
-    async def structure_text_with_chatgpt(self, text: str) -> str:
+    async def structure_text_with_chatgpt(self, text: str) -> dict:
         data = StructureTextRequestSchema(
             messages=[
-                PromtMessageSchema(role=PromtMessageRole.SYSTEM, content=MAKING_STRUCTURE_SYSTEM_PROMT),
-                PromtMessageSchema(role=PromtMessageRole.USER, content=MAKING_STRUCTURE_USER_PROMT.format(text=text))
+                PromtMessageSchema(role=PromtMessageRole.SYSTEM, content=MAKING_STRUCTURE_SYSTEM_PROMPT),
+                PromtMessageSchema(role=PromtMessageRole.USER, content=MAKING_STRUCTURE_USER_PROMPT.format(text=text))
             ]
         )
         try:
@@ -51,34 +58,70 @@ class OpenAIService:
                 async with session.post(
                     settings.open_ai.chat_gpt_url,
                     json=data.model_dump(),
-                    proxy=self.proxy_url
+                    proxy=self.proxy_url,
+                    ssl=False
                 ) as response:
                     result = await response.json()
                     if response.status != 200:
-                        logger.error(f"Transcription API error: {response.status}, {result}")
-                        raise ExceptionTranscriptionAPI(f"{response.status}, {result}")
+                        error_text = f"Transcription API error: {response.status}, {result}"
+                        logger.error(error_text)
+                        raise ExceptionOpenAiFailed(error_text)
 
                     return result
 
         except aiohttp.ClientError as e:
-            logger.error(f"Network error during transcription: {str(e)}")
-            raise ExceptionTranscriptionFailed(str(e))
+            error_text = f"Network error during transcription: {str(e)}"
+            logger.error(error_text)
+            raise ExceptionOpenAiFailed(error_text)
 
-    async def text_transcription_from_url(self) -> str | None:
+    async def text_transcription_from_url(self):
         audio_buffer = await self._audio_service.download_audio_from_s3_to_buffer()
         try:
             text_transcription = await self.get_raw_transcription_from_buffer(
                 audio_buffer, self._audio_service.filename
             )
-        except Exception as e:
-            logger.error(f"Transcription failed: {str(e)}")
-            return
-        else:
             return text_transcription
+        except Exception as e:
+            error_text = f"Transcription failed: {str(e)}"
+            logger.error(error_text)
+            raise ExceptionOpenAiFailed(error_text)
+
         finally:
             audio_buffer.close()
 
     async def analyze_structured_text(
-        self, structure_text: dict[str, str], analysis: dict[str, str]
+        self, structure_text: dict[str, str], analysis_benchmark: dict[str, str]
     ) -> dict[Any, Any]:
-        ...
+        data = StructureTextRequestSchema(
+            messages=[
+                PromtMessageSchema(role=PromtMessageRole.SYSTEM, content=MAKING_ANALYZES_SYSTEM_PROMPT),
+                PromtMessageSchema(
+                    role=PromtMessageRole.USER,
+                    content=MAKING_ANALYZES_USER_PROMPT.format(
+                        structure_text=structure_text,
+                        analysis_benchmark=analysis_benchmark,
+                        REQUIRED_JSON_OUTPUT_FORMAT=REQUIRED_JSON_OUTPUT_FORMAT
+                    )
+                )
+            ]
+        )
+        try:
+            timeout = aiohttp.ClientTimeout(total=300)
+            async with aiohttp.ClientSession(timeout=timeout, headers=self._headers) as session:
+                async with session.post(
+                        settings.open_ai.chat_gpt_url,
+                        json=data.model_dump(),
+                        proxy=self.proxy_url,
+                        ssl=False
+                ) as response:
+                    result = await response.json()
+                    if response.status != 200:
+                        logger.error(f"Analyze API error: {response.status}, {result}")
+                        raise ExceptionTranscriptionAPI(f"{response.status}, {result}")
+
+                    return result
+
+        except aiohttp.ClientError as e:
+            error_text = f"Network error during analyze: {str(e)}"
+            logger.error(error_text)
+            raise ExceptionOpenAiFailed(error_text)

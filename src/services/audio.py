@@ -32,7 +32,7 @@ class AudioService:
         try:
             timeout = aiohttp.ClientTimeout(total=300)
             async with aiohttp.ClientSession(timeout=timeout) as session:
-                async with session.get(self.audio_url) as response:
+                async with session.get(self.audio_url, ssl=False) as response:
                     if response.status != 200:
                         logger.error(f"Failed to download audio: HTTP {response.status}")
                         raise ExceptionWhenDownloadAudio(f"{response.status}")

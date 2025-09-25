@@ -44,8 +44,14 @@ class ExceptionTranscriptionAPI(CustomException):
         self.code = f"Transcription API error: {message}"
 
 
-class ExceptionTranscriptionFailed(CustomException):
+class ExceptionOpenAiFailed(CustomException):
     def __init__(self, message: str) -> None:
         self.status_code = HTTPStatus.BAD_REQUEST
-        self.message = f"Transcription failed: {message}"
-        self.code = f"Transcription failed: {message}"
+        self.message = f"Error: {message}"
+        self.code = f"Error: {message}"
+
+class ExceptionProcessingCallSession(CustomException):
+    def __init__(self, message: str) -> None:
+        self.status_code = HTTPStatus.BAD_REQUEST
+        self.message = f"Error: {message}"
+        self.code = f"Error: {message}"

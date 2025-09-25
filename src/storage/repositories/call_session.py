@@ -43,7 +43,7 @@ class CallSessionRepository(BaseRepository[CallSession]):
     async def get_call_session_by_id(self, call_session_id: uuid.UUID) -> CallSession:
         query = (
             select(self.model)
-            .where(self.model.session_id == call_session_id)
+            .where(self.model.id == call_session_id)
         )
         res = await self.session.execute(query)
 
