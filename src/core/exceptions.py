@@ -16,6 +16,13 @@ class ExceptionWhenCreatingCallSessionRecord(CustomException):
         self.code = "Error when creating a record about CallSession."
 
 
+class ExceptionWhenCreatingProcessingLogRecord(CustomException):
+    def __init__(self) -> None:
+        self.status_code = HTTPStatus.BAD_REQUEST
+        self.message = "Error when creating a record about ProcessingLog."
+        self.code = "Error when creating a record about ProcessingLog."
+
+
 class ExceptionWhenUpdatingCallSessionRecord(CustomException):
     def __init__(self) -> None:
         self.status_code = HTTPStatus.BAD_REQUEST

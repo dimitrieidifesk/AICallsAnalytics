@@ -4,6 +4,7 @@ import aiohttp
 
 from loguru import logger
 from pydantic import HttpUrl
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.processing_worker.schema.open_ai import StructureTextRequestSchema, PromtMessageSchema
 from src.core.config import settings
@@ -16,13 +17,14 @@ from src.core.prompts import (
 )
 from src.services.audio import AudioService
 from src.storage.models.enums import PromtMessageRole
+from src.storage.repositories.processing_log import ProcessingLogRepository
 
 
 class OpenAIService:
-    def __init__(self, audio_url: HttpUrl):
+    def __init__(self, audio_url: HttpUrl, session: AsyncSession):
         self.proxy_url = str(settings.open_ai.proxy_url)
         self._audio_service = AudioService(str(audio_url))
-        # self._processing_log_repo =
+        self._processing_log_repo = ProcessingLogRepository(session)
         self._headers = {"Authorization": f"Bearer {settings.open_ai.api_key}"}
 
     async def get_raw_transcription_from_buffer(self, audio_buffer: BinaryIO, filename: str) -> str:

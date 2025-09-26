@@ -1,7 +1,6 @@
 import json
 import uuid
 
-from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions import ExceptionProcessingCallSession
@@ -15,7 +14,8 @@ class CallSessionProcessingWorker:
 
     def __init__(self, session: AsyncSession, call_session_id: uuid.UUID):
         self.call_session_id = call_session_id
-        self._call_session_repo = CallSessionRepository(session)
+        self.session = session
+        self._call_session_repo = CallSessionRepository(self.session)
         self._open_ai_service = None
 
     async def get_text_from_audio(self, call_session: CallSession) -> str:
@@ -76,7 +76,7 @@ class CallSessionProcessingWorker:
             error_text =f"Call session id {self.call_session_id} not found!"
             raise ExceptionProcessingCallSession(error_text)
 
-        self._open_ai_service = OpenAIService(call_session.recording_url)
+        self._open_ai_service = OpenAIService(call_session.recording_url, self.session)
         await self._call_session_repo.update_call_session(
             self.call_session_id, {"status": CallSessionStatus.IN_PROCESSING}
         )
