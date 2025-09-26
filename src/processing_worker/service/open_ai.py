@@ -22,6 +22,7 @@ class OpenAIService:
     def __init__(self, audio_url: HttpUrl):
         self.proxy_url = str(settings.open_ai.proxy_url)
         self._audio_service = AudioService(str(audio_url))
+        # self._processing_log_repo =
         self._headers = {"Authorization": f"Bearer {settings.open_ai.api_key}"}
 
     async def get_raw_transcription_from_buffer(self, audio_buffer: BinaryIO, filename: str) -> str:

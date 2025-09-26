@@ -53,17 +53,22 @@ class CallSessionProcessingWorker:
             return structure_text
 
     async def get_analytical_for_structure_text(
-            self, structure_text: dict[str, str], analysis_benchmark: dict[str, str]):
+            self, structure_text: dict[str, str], analysis_benchmark: dict[str, str]
+    ) -> None:
         try:
             data = await self._open_ai_service.analyze_structured_text(structure_text, analysis_benchmark)
+            result = json.loads(data["choices"][0]["message"]["content"])
         except Exception as e:
+            await self._call_session_repo.update_call_session(
+                self.call_session_id, {"status": CallSessionStatus.ERROR_RECEIVING_ANALYTICS}
+            )
             error_text = f"Analytical structure text from url failed! Error: {e}"
             raise ExceptionProcessingCallSession(error_text)
         else:
             await self._call_session_repo.update_call_session(
-                self.call_session_id, {"transcription": {"data": structure_text}}
+                self.call_session_id, {"analysis": {"data": result}}
             )
-            return data
+
 
     async def processing(self):
         call_session = await self._call_session_repo.get_call_session_by_id(self.call_session_id)
@@ -75,3 +80,13 @@ class CallSessionProcessingWorker:
         await self._call_session_repo.update_call_session(
             self.call_session_id, {"status": CallSessionStatus.IN_PROCESSING}
         )
+        try:
+            text_from_audio = await self.get_text_from_audio(call_session)
+            structure_text = await self.structure_text_to_dict(text_from_audio)
+            await self.get_analytical_for_structure_text(structure_text, call_session.script)
+        except Exception as e:
+            raise ExceptionProcessingCallSession(str(e))
+        else:
+            await self._call_session_repo.update_call_session(
+                self.call_session_id, {"status": CallSessionStatus.PROCESSING_COMPLETED}
+            )

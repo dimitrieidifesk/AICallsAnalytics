@@ -55,3 +55,10 @@ class ExceptionProcessingCallSession(CustomException):
         self.status_code = HTTPStatus.BAD_REQUEST
         self.message = f"Error: {message}"
         self.code = f"Error: {message}"
+
+
+class ExceptionCallSessionStatusWhenGetting(CustomException):
+    def __init__(self, message: str) -> None:
+        self.status_code = HTTPStatus.BAD_REQUEST
+        self.message = f"Error: Call session status - {message}"
+        self.code = f"Error: Call session status - {message}"

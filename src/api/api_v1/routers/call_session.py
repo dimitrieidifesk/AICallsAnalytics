@@ -1,11 +1,12 @@
+import uuid
 from http import HTTPStatus
 
 from fastapi import APIRouter
 
 from src.api.api_v1.schemas.call_session import (
     CallSessionCreateSchema,
-    CallSessionAnalysisResponseSchema,
-    TranscriptionCallSessionResponseSchema
+    CallSessionCreateResponseSchema,
+    TranscriptionCallSessionResponseSchema,
 )
 from src.api.dependencies.getter import CallSessionServiceDep
 from src.api.dependencies.verify_user import VerifyUser
@@ -18,26 +19,26 @@ async def create_call_session(
     _: VerifyUser,
     data: CallSessionCreateSchema,
     service: CallSessionServiceDep,
-) -> None:
+) -> CallSessionCreateResponseSchema:
 
     return await service.create_new_call_session(data)
 
 
-@router.get("/analysis/{session_id}")
+@router.get("/analysis/{call_session_id}")
 async def get_call_session_analysis(
     _: VerifyUser,
-    session_id: str,
+    call_session_id: uuid.UUID,
     service: CallSessionServiceDep,
-) -> CallSessionAnalysisResponseSchema:
+) -> None:
 
-    return await service.get_call_session_analysis(session_id)
+    return await service.get_call_session_analysis(call_session_id)
 
 
-@router.get("/transcription/{session_id}")
+@router.get("/transcription/{call_session_id}")
 async def get_call_session_transcription(
     _: VerifyUser,
-    session_id: str,
+    call_session_id: uuid.UUID,
     service: CallSessionServiceDep,
 ) -> TranscriptionCallSessionResponseSchema:
 
-    return await service.get_call_session_transcription(session_id)
+    return await service.get_call_session_transcription(call_session_id)

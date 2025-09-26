@@ -7,7 +7,6 @@ from src.core.config import settings
 from src.core.constants import QUEUE_PATH
 from src.integrations.broker.schemas import CallSessionProcessingSchema
 from src.processing_worker.service.worker import CallSessionProcessingWorker
-from src.services.utils import process_audio_recording
 from src.storage.models.db_helper import db_connector
 
 

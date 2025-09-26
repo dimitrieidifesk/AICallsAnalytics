@@ -2,7 +2,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Enum, JSON, ForeignKey
+from sqlalchemy import Enum, Text, ForeignKey
 
 from src.storage.models import IdUUIDPkMixin, CreatedMixin
 from src.storage.models.base import Base
@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 
 class ProcessingLog(Base, IdUUIDPkMixin, CreatedMixin):
-    request: Mapped[dict] = mapped_column(JSON)
-    response: Mapped[dict] = mapped_column(JSON)
+    request: Mapped[dict] = mapped_column(Text)
+    response: Mapped[dict] = mapped_column(Text)
     request_type: Mapped[RequestTypeOpenAi] = mapped_column(
         Enum(RequestTypeOpenAi, values_callable=lambda x: [e.value for e in RequestTypeOpenAi]),
         name="request_type",

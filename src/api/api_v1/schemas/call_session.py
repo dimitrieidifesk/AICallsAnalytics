@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 from pydantic import HttpUrl
@@ -46,6 +47,10 @@ class ScriptSchema(BaseSchema):
 class CallSessionCreateSchema(BaseSchema):
     call: CallCreateSchema
     script: ScriptSchema
+
+
+class CallSessionCreateResponseSchema(BaseSchema):
+    call_session_id: uuid.UUID
 
 
 class ScriptComplianceSchema(BaseSchema):
