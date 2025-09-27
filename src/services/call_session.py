@@ -7,7 +7,7 @@ from src.api.api_v1.schemas.call_session import (
     CallSessionCreateSchema,
     CallSessionAnalysisResponseSchema,
     TranscriptionCallSessionResponseSchema,
-    CallSessionCreateResponseSchema
+    CallSessionCreateResponseSchema, AnalysisResponseSchema, MetadataSchema
 )
 from src.core.exceptions import ExceptionCallSessionNotFound, ExceptionCallSessionStatusWhenGetting
 from src.integrations.broker.rabbit_broker import broker
@@ -40,7 +40,11 @@ class CallSessionService:
         if call_session.status != CallSessionStatus.PROCESSING_COMPLETED:
             raise ExceptionCallSessionStatusWhenGetting(call_session.status)
 
-        return 
+        return CallSessionAnalysisResponseSchema(
+            session_id=call_session.session_id,
+            analysis=AnalysisResponseSchema(**call_session.analysis.get("data")),
+            metadata=MetadataSchema(processed_at=call_session.created_at)
+        )
 
     async def get_call_session_transcription(self, call_session_id: uuid.UUID) -> TranscriptionCallSessionResponseSchema:
         call_session = await self._repository.get_call_session_by_id(call_session_id)

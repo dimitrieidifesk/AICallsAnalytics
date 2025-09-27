@@ -1,3 +1,4 @@
+import json
 import uuid
 from typing import BinaryIO, Any
 
@@ -57,7 +58,7 @@ class OpenAIService:
                         raise ExceptionOpenAiFailed(error_text)
 
                     result = await response.json()
-                    await self._processing_log_repo.update(processing_log.id, {"response": result.get('text', '')})
+                    await self._processing_log_repo.update(processing_log.id, {"response": json.dumps(result)})
 
                     return result.get('text', '')
 
@@ -97,7 +98,7 @@ class OpenAIService:
                         logger.error(error_text)
                         raise ExceptionOpenAiFailed(error_text)
 
-                    await self._processing_log_repo.update(processing_log.id, {"response": result})
+                    await self._processing_log_repo.update(processing_log.id, {"response": json.dumps(result)})
 
                     return result
 
@@ -160,6 +161,8 @@ class OpenAIService:
                         logger.error(error_text)
                         await self._processing_log_repo.update(processing_log.id, {"response": error_text})
                         raise ExceptionTranscriptionAPI(error_text)
+
+                    await self._processing_log_repo.update(processing_log.id, {"response": json.dumps(result)})
 
                     return result
 

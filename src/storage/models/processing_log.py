@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 
 class ProcessingLog(Base, IdUUIDPkMixin, CreatedMixin):
-    request: Mapped[dict] = mapped_column(Text)
-    response: Mapped[dict] = mapped_column(Text)
+    request: Mapped[dict] = mapped_column(Text, nullable=True)
+    response: Mapped[dict] = mapped_column(Text, nullable=True)
     request_type: Mapped[RequestTypeOpenAi] = mapped_column(
         Enum(RequestTypeOpenAi, values_callable=lambda x: [e.value for e in RequestTypeOpenAi]),
         name="request_type",

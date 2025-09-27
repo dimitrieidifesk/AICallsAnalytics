@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from src.api.api_v1.schemas.call_session import (
     CallSessionCreateSchema,
     CallSessionCreateResponseSchema,
-    TranscriptionCallSessionResponseSchema,
+    TranscriptionCallSessionResponseSchema, CallSessionAnalysisResponseSchema,
 )
 from src.api.dependencies.getter import CallSessionServiceDep
 from src.api.dependencies.verify_user import VerifyUser
@@ -29,7 +29,7 @@ async def get_call_session_analysis(
     _: VerifyUser,
     call_session_id: uuid.UUID,
     service: CallSessionServiceDep,
-) -> None:
+) -> CallSessionAnalysisResponseSchema:
 
     return await service.get_call_session_analysis(call_session_id)
 

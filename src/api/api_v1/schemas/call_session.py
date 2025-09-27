@@ -4,6 +4,7 @@ from datetime import datetime
 from pydantic import HttpUrl
 
 from src.api.api_v1.schemas.base import BaseSchema
+from src.core.config import settings
 from src.storage.models.enums import LeadQuality
 
 
@@ -88,9 +89,9 @@ class AnalysisResponseSchema(BaseSchema):
 
 class MetadataSchema(BaseSchema):
     processed_at: datetime
-    gpt_model_used: str = "gpt-4o"
-    transcription_model_used: str = "whisper-large-v3"
-    analysis_version: str = "1.2.0"
+    gpt_model_used: str = settings.open_ai.chat_model
+    transcription_model_used: str = settings.open_ai.whisper_model
+    analysis_version: str = "0.0.1"
 
 
 class TranscriptionCallSessionResponseSchema(BaseSchema):
@@ -99,7 +100,6 @@ class TranscriptionCallSessionResponseSchema(BaseSchema):
 
 class CallSessionAnalysisResponseSchema(BaseSchema):
     session_id: str
-    # transcription: ...
     analysis: AnalysisResponseSchema
     metadata: MetadataSchema
 
