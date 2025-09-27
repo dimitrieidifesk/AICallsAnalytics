@@ -23,6 +23,13 @@ class ExceptionWhenCreatingProcessingLogRecord(CustomException):
         self.code = "Error when creating a record about ProcessingLog."
 
 
+class ExceptionWhenUpdatingProcessingLogRecord(CustomException):
+    def __init__(self) -> None:
+        self.status_code = HTTPStatus.BAD_REQUEST
+        self.message = "Error when updating a record about ProcessingLog."
+        self.code = "Error when updating a record about ProcessingLog."
+
+
 class ExceptionWhenUpdatingCallSessionRecord(CustomException):
     def __init__(self) -> None:
         self.status_code = HTTPStatus.BAD_REQUEST
@@ -47,8 +54,8 @@ class ExceptionWhenDownloadAudio(CustomException):
 class ExceptionTranscriptionAPI(CustomException):
     def __init__(self, message: str) -> None:
         self.status_code = HTTPStatus.BAD_REQUEST
-        self.message = f"Transcription API error: {message}"
-        self.code = f"Transcription API error: {message}"
+        self.message = f"Error: {message}"
+        self.code = f"Error: {message}"
 
 
 class ExceptionOpenAiFailed(CustomException):

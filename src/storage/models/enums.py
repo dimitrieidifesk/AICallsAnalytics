@@ -20,6 +20,7 @@ class LeadQuality(StrEnum):
 class RequestTypeOpenAi(StrEnum):
     TRANSCRIPTION = "TRANSCRIPTION"
     ANALYTIC = "ANALYTIC"
+    DECODING = "DECODING"
 
 
 class PromtMessageRole(StrEnum):

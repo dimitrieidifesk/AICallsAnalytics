@@ -40,7 +40,7 @@ class CallSessionRepository(BaseRepository[CallSession]):
 
         return res.scalar()
 
-    async def update_call_session(
+    async def update(
         self, call_session_id: uuid.UUID, data: dict[str, Any]
     ):
         query = (
