@@ -89,3 +89,33 @@ class CallSessionProcessingWorker:
             await self._call_session_repo.update(
                 self.call_session_id, {"status": CallSessionStatus.PROCESSING_COMPLETED}
             )
+
+    async def finish_processing(self):
+        call_session = await self._call_session_repo.get_call_session_by_id(self.call_session_id)
+        if not call_session:
+            error_text = f"Call session id {self.call_session_id} not found!"
+            raise ExceptionProcessingCallSession(error_text)
+
+        self._open_ai_service = OpenAIService(call_session.recording_url, self.session, call_session.id)
+        await self._call_session_repo.update(
+            self.call_session_id, {"status": CallSessionStatus.IN_PROCESSING}
+        )
+        try:
+            if not call_session.analysis:
+                if call_session.transcription:
+                    await self.get_analytical_for_structure_text(call_session.transcription, call_session.script)
+                else:
+                    if call_session.text_from_audio:
+                        structure_text = await self.structure_text_to_dict(call_session.text_from_audio)
+                    else:
+                        text_from_audio = await self.get_text_from_audio(call_session)
+                        structure_text = await self.structure_text_to_dict(text_from_audio)
+
+                    await self.get_analytical_for_structure_text(structure_text, call_session.script)
+
+        except Exception as e:
+            raise ExceptionProcessingCallSession(str(e))
+        else:
+            await self._call_session_repo.update(
+                self.call_session_id, {"status": CallSessionStatus.PROCESSING_COMPLETED}
+            )

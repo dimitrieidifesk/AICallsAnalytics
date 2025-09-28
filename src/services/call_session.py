@@ -9,7 +9,7 @@ from src.api.api_v1.schemas.call_session import (
     TranscriptionCallSessionResponseSchema,
     CallSessionCreateResponseSchema, AnalysisResponseSchema, MetadataSchema
 )
-from src.core.exceptions import ExceptionCallSessionNotFound, ExceptionCallSessionStatusWhenGetting
+from src.core.exceptions import ExceptionCallSessionNotFound, ExceptionCallSessionStatus
 from src.integrations.broker.rabbit_broker import broker
 from src.integrations.broker.schemas import CallSessionProcessingSchema
 from src.storage.models.enums import CallSessionStatus
@@ -38,7 +38,7 @@ class CallSessionService:
             raise ExceptionCallSessionNotFound
 
         if call_session.status != CallSessionStatus.PROCESSING_COMPLETED:
-            raise ExceptionCallSessionStatusWhenGetting(call_session.status)
+            raise ExceptionCallSessionStatus(call_session.status)
 
         return CallSessionAnalysisResponseSchema(
             session_id=call_session.session_id,
@@ -51,7 +51,20 @@ class CallSessionService:
         if not call_session:
             raise ExceptionCallSessionNotFound
 
-        if call_session.status != CallSessionStatus.PROCESSING_COMPLETED:
-            raise ExceptionCallSessionStatusWhenGetting(call_session.status)
+        if (
+                call_session.transcription or
+                call_session.status == CallSessionStatus.PROCESSING_COMPLETED
+        ):
+            return TranscriptionCallSessionResponseSchema(transcription=call_session.transcription.get("data"))
+        else:
+            raise ExceptionCallSessionStatus(call_session.status)
 
-        return TranscriptionCallSessionResponseSchema(transcription=call_session.transcription.get("data"))
+    async def finish_processing_call_session_by_status(self, call_session_id: uuid.UUID) -> None:
+        call_session = await self._repository.get_call_session_by_id(call_session_id)
+        if not call_session:
+            raise ExceptionCallSessionNotFound
+
+        if call_session.status == CallSessionStatus.PROCESSING_COMPLETED:
+            raise ExceptionCallSessionStatus(call_session.status)
+
+

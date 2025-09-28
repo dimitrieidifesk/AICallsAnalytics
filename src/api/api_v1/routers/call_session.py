@@ -42,3 +42,13 @@ async def get_call_session_transcription(
 ) -> TranscriptionCallSessionResponseSchema:
 
     return await service.get_call_session_transcription(call_session_id)
+
+
+@router.get("/finish_processing/{call_session_id}")
+async def finish_processing_call_session(
+    _: VerifyUser,
+    call_session_id: uuid.UUID,
+    service: CallSessionServiceDep,
+) -> None:
+
+    return await service.get_call_session_transcription(call_session_id)
