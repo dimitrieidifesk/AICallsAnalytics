@@ -23,6 +23,12 @@ class RequestTypeOpenAi(StrEnum):
     DECODING = "DECODING"
 
 
+class QueueAction(StrEnum):
+    CREATE = "CREATE"
+    UPDATE = "UPDATE"
+
+
+
 class PromtMessageRole(StrEnum):
     SYSTEM = "system"
     USER = "user"

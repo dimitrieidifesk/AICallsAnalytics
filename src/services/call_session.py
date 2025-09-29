@@ -12,7 +12,7 @@ from src.api.api_v1.schemas.call_session import (
 from src.core.exceptions import ExceptionCallSessionNotFound, ExceptionCallSessionStatus
 from src.integrations.broker.rabbit_broker import broker
 from src.integrations.broker.schemas import CallSessionProcessingSchema
-from src.storage.models.enums import CallSessionStatus
+from src.storage.models.enums import CallSessionStatus, QueueAction
 from src.storage.repositories.call_session import CallSessionRepository
 
 
@@ -27,7 +27,7 @@ class CallSessionService:
         data_dict["recording_url"] = str(data.call.recording_url)
         call_session = await self._repository.create(data_dict)
         await broker.publish(
-            CallSessionProcessingSchema(call_session_id=call_session.id)
+            CallSessionProcessingSchema(call_session_id=call_session.id, action=QueueAction.CREATE)
         )
 
         return CallSessionCreateResponseSchema(call_session_id=call_session.id)
@@ -67,4 +67,6 @@ class CallSessionService:
         if call_session.status == CallSessionStatus.PROCESSING_COMPLETED:
             raise ExceptionCallSessionStatus(call_session.status)
 
-
+        await broker.publish(
+            CallSessionProcessingSchema(call_session_id=call_session.id, action=QueueAction.UPDATE)
+        )

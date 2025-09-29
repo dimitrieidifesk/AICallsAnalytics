@@ -51,4 +51,4 @@ async def finish_processing_call_session(
     service: CallSessionServiceDep,
 ) -> None:
 
-    return await service.get_call_session_transcription(call_session_id)
+    return await service.finish_processing_call_session_by_status(call_session_id)

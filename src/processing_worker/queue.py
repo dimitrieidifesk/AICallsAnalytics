@@ -8,6 +8,7 @@ from src.core.constants import QUEUE_PATH
 from src.integrations.broker.schemas import CallSessionProcessingSchema
 from src.processing_worker.service.worker import CallSessionProcessingWorker
 from src.storage.models.db_helper import db_connector
+from src.storage.models.enums import QueueAction
 
 
 class QueueService:
@@ -20,7 +21,13 @@ class QueueService:
         try:
             async for session in db_connector.session_getter():
                 worker = CallSessionProcessingWorker(session, msg.call_session_id)
-                await worker.processing()
+                match msg.action:
+                    case QueueAction.CREATE:
+                        await worker.processing()
+                    case QueueAction.UPDATE:
+                        await worker.finish_processing()
+                    case _:
+                        logger.error(f"Unknown action: {msg.action}")
         except Exception as e:
             logger.error(e)
 
