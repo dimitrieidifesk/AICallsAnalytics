@@ -1,15 +1,17 @@
-# roi-backend-base-tmp
+# Ai Calls Analytics
 
 
 
 ## Description
-Base template for the ROI backend projects.
-Has 2 databases (main and test), Redis, and a backend service with a start.sh script that runs migrations and starts the server.
-Database connector already developed.
-Has 2 modes for starting env=local and env=prod, uvicorn and gunicorn respectively.
+Проект предназначен для анализа телефонных разговоров с применением методов машинного обучения и обработки естественного языка.
+
+📋 Необходимые условия для продакшена:
+- Внешняя база данных PostgreSQL.
+- Отдельно работающая очередь сообщений (RabbitMQ).
+Переменная окружения $REMOTE_PROJECT_DIR должна указывать на удалённый каталог проекта, содержащий .env файл с секретами и конфигурацией.
 
 ## Start
-Run `docker-compose up` to start the backend.
+Run `docker-compose -f docker-compose.prod.yml up --build` to start the backend.
 
 ## Libraries
 - [FastAPI](https://fastapi.tiangolo.com/)
@@ -19,7 +21,6 @@ Run `docker-compose up` to start the backend.
 - [redis](https://redis.io/)
 - [fakeredis](https://pypi.org/project/fakeredis/)
 - [gunicorn](https://docs.gunicorn.org/en/latest/index.html)
-- [pytest](https://docs.pytest.org/en/latest/)
 - [mypy](https://mypy.readthedocs.io/en/stable/index.html)
 - [ruff](https://beta.ruff.rs/docs/)
 - [asyncpg](https://github.com/MagicStack/asyncpg)
@@ -28,6 +29,11 @@ Run `docker-compose up` to start the backend.
 - [pydantic-settings](https://github.com/pydantic/pydantic-settings)
 - [poetry](https://python-poetry.org/)
 - [alembic-postgresql-enum](https://pypi.org/project/alembic-postgresql-enum/)
+- [aiocache](https://pypi.org/project/aiocache/)
+- [aiohttp](https://pypi.org/project/aiohttp/)
+- [aiormq](https://pypi.org/project/aiormq/)
+- [faststream](https://pypi.org/project/faststream/)
+
 
 ## Structure
 
@@ -45,10 +51,10 @@ Run `docker-compose up` to start the backend.
   - **models** Описание моделей базы данных.
   - **repositories**: Работа с базой данных.
 
-### tests
-Модуль для тестирования.
-- **fixtures**: Фикстуры для тестов.
-
 ### migrations
 Директория для миграций базы данных.
 - **versions**: Версии миграций.
+
+
+### logs
+Папка с файлами логов.
