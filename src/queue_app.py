@@ -2,15 +2,14 @@ import asyncio
 
 from loguru import logger
 
-from src.processing_worker.queue import QueueService
+from src.core.config import settings
+from src.processing_worker.queue import run_in_process_pool
 
 
 async def main() -> None:
-
+    tasks = [run_in_process_pool(index) for index in range(1, settings.number_of_processes + 1)]
     try:
-        logger.info("Start queue!")
-        queue_service = QueueService()
-        await queue_service.run_async()
+        await asyncio.gather(*tasks)
     except asyncio.CancelledError as e:
         logger.error(
             f"Cancelled error occured. Gracefully shutdown broker.\nTraceback:\n{e}"

@@ -1,7 +1,9 @@
+from datetime import date
 from pathlib import Path
 from typing import Literal
 
 from dotenv import load_dotenv
+from loguru import logger
 from pydantic import BaseModel, ConfigDict, HttpUrl
 from pydantic import PostgresDsn
 from pydantic_settings import (
@@ -15,7 +17,12 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOG_DEFAULT_FORMAT = "[%(asctime)s.%(msecs)03d] %(module)10s:%(lineno)-3d %(levelname)-7s - %(message)s"
-
+logger.add(
+    f"{BASE_DIR.parent}/logs/{date.today()}.log",
+    colorize=True,
+    format="[{level}] | {time:YYYY-MM-DD at HH:mm:ss} | {message}",
+    level="INFO"
+)
 
 class BaseSchema(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
@@ -125,6 +132,7 @@ class Settings(BaseSettings):
     version: str = "0.1.0"
     env: str
     domain: str
+    number_of_processes: int
     default_timezone: str = "UTC"
 
 

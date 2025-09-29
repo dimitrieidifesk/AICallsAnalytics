@@ -1,4 +1,5 @@
 import asyncio
+from concurrent.futures import ProcessPoolExecutor
 
 from loguru import logger
 from faststream.rabbit import RabbitBroker
@@ -31,7 +32,7 @@ class QueueService:
         except Exception as e:
             logger.error(e)
 
-    async def run_async(self) -> None:
+    async def run(self) -> None:
         self._broker.subscriber(queue=QUEUE_PATH)(self.handle_queue_message)
         await self._broker.start()
         try:
@@ -41,3 +42,19 @@ class QueueService:
             logger.error(f"Value error occured. Continue event loop\nTraceback:\n{e}")
             while True:
                 await asyncio.sleep(86400)
+
+
+async def run_async_queue() -> None:
+    queue_service = QueueService()
+    await queue_service.run()
+
+
+def run_sync_queue(index: int) -> None:
+    logger.info(f"Start queue {index=}!")
+    asyncio.run(run_async_queue())
+
+
+async def run_in_process_pool(index: int) -> None:
+    loop = asyncio.get_running_loop()
+    with ProcessPoolExecutor() as pool:
+        await loop.run_in_executor(pool, run_sync_queue, index)
