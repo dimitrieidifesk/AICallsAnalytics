@@ -38,10 +38,15 @@ class CallSessionProcessingWorker:
             )
             return text_from_audio
 
-    async def structure_text_to_dict(self, text: str) -> dict[str, str]:
+    async def structure_text_to_dict(self, text: str) -> dict[str, str] | None:
         try:
             data = await self._open_ai_service.structure_text_with_chatgpt(text)
+            logger.info(data)
             structure_text = json.loads(data["choices"][0]["message"]["content"])
+            if isinstance(structure_text, dict) and structure_text.get("status") == "invalid":
+                logger.info(structure_text)
+                structure_text = None
+
         except Exception as e:
             error_text = f"Structure text from url failed! Error: {e}"
             await self._call_session_repo.update(
@@ -49,9 +54,10 @@ class CallSessionProcessingWorker:
             )
             raise ExceptionProcessingCallSession(error_text)
         else:
-            await self._call_session_repo.update(
-                self.call_session_id, {"transcription": {"data": structure_text}}
-            )
+            if structure_text:
+                await self._call_session_repo.update(
+                    self.call_session_id, {"transcription": {"data": structure_text}}
+                )
             return structure_text
 
     async def get_analytical_for_structure_text(
@@ -85,14 +91,18 @@ class CallSessionProcessingWorker:
             start_time = time.time()
             text_from_audio = await self.get_text_from_audio(call_session)
             structure_text = await self.structure_text_to_dict(text_from_audio)
-            await self.get_analytical_for_structure_text(structure_text, call_session.script)
+            if structure_text:
+                await self.get_analytical_for_structure_text(structure_text, call_session.script)
+                status = CallSessionStatus.PROCESSING_COMPLETED
+            else:
+                status = CallSessionStatus.FAKE_DIALOGUE
             end_time = time.time()
-            logger.info(f"Processing time: {end_time - start_time} seconds")
+            logger.info(f"Processing time: {round(end_time - start_time, 2)} seconds")
         except Exception as e:
             raise ExceptionProcessingCallSession(str(e))
         else:
             await self._call_session_repo.update(
-                self.call_session_id, {"status": CallSessionStatus.PROCESSING_COMPLETED}
+                self.call_session_id, {"status": status}
             )
 
     async def finish_processing(self):

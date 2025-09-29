@@ -9,6 +9,7 @@ class CallSessionStatus(StrEnum):
     RECEIVING_ANALYTICS = "Receiving analytics"
     ERROR_RECEIVING_ANALYTICS = "Error receiving analytics"
     PROCESSING_COMPLETED = "Processing completed"
+    FAKE_DIALOGUE = "Fake dialogue"
 
 
 class LeadQuality(StrEnum):

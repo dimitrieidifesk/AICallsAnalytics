@@ -1,33 +1,72 @@
 from typing import Final
 
-MAKING_STRUCTURE_SYSTEM_PROMPT: Final[str] =  """
-        ### Task Description
-        You need to segment the provided dialogue into two distinct roles: "client" and "manager".
-        Ensure that you follow these guidelines carefully:
-            - **Manager**: This role belongs to the company's employee who aims to provide information about services,resolve issues, clarify details,
-            and assist clients. Managers usually respond positively and avoid starting goodbye messages.
-            - **Client**: Clients typically express uncertainty, raise questions, voice complaints, or indicate dissatisfaction regarding prices, conditions, etc.
-            Their speech often includes negative words like "no," "not satisfied," or questioning phrases.
-
-        ### Instructions
-        The expected output must adhere to the following structure:
-        json[{"role": "client", "text": "Client's statement"}, {"role": "manager", "text": "Manager's reply"}]
-        Each element in the array corresponds to a single line of dialogue attributed to the appropriate role.
-        ### Example CasesCase #1:
-        Dialogue:"Good afternoon, I'm interested in cleaning services.""Hello, our company offers comprehensive cleaning solutions.
-        Please tell us more about what you're looking for."
-        Correct Segregation:
-        [{"role": "client", "text": "Good afternoon, I'm interested in cleaning services."},
-        {"role": "manager", "text": "Hello, our company offers comprehensive cleaning solutions.
-        Please tell us more about what you're looking for."}]
-        Case #2:
-        Dialogue:"This price seems too high!""We guarantee excellent quality and reliable results."Correct Segregation:
-        json[{"role": "client", "text": "This price seems too high!"},
-        {"role": "manager", "text": "We guarantee excellent quality and reliable results."}]
-        ### Replace <DIALOGUE_PLACEHOLDER> with your real dialogue before running the prompt.
-        json<DIALOGUE_PLACEHOLDER>
+MAKING_STRUCTURE_SYSTEM_PROMPT: Final[str] = """
+    ### Task Description
+    Your task has TWO STAGES:
+    
+    **STAGE 1: VALIDATION CHECK**
+    Before processing, you MUST check if the provided text meets these criteria:
+    - Contains actual conversational text (not empty or placeholder)
+    - Represents a real dialogue between humans
+    - Is NOT any of the following invalid types:
+      * Auto-reply messages
+      * Voicemail greetings
+      * Phone beeps/signals
+      * System messages
+      * Placeholder text like "text", "dialogue", etc.
+      * Single monologues without interaction
+      * Non-conversational content
+    
+    If the text fails validation, respond with: {"status": "invalid", "reason": "clear explanation"}
+    
+    **STAGE 2: DIALOGUE SEGMENTATION**
+    Only if the text passes validation, proceed to segment the dialogue into two distinct roles: "client" and "manager".
+    
+    ### Role Guidelines
+    - **Manager**: Company employee who provides information, resolves issues, clarifies details, and assists clients. Usually responds positively and avoids initiating goodbye messages.
+    - **Client**: Expresses uncertainty, raises questions, voices complaints, or shows dissatisfaction. Speech often includes negative words like "no," "not satisfied," or questioning phrases.
+    
+    ### Output Structure
+    **CRITICAL FORMAT REQUIREMENTS:**
+    - Output MUST be valid JSON that can be directly parsed by json.loads()
+    - NO extra newlines (\\n) within the JSON structure
+    - NO trailing commas
+    - NO extra spaces or invisible characters
+    - String values must be properly escaped
+    - Array must be properly formatted without line breaks
+    
+    For valid dialogues ONLY:
+    [{"role": "client", "text": "Client's statement"}, {"role": "manager", "text": "Manager's reply"}]
+    
+    For invalid dialogues:
+    {"status": "invalid", "reason": "clear explanation"}
+    
+    ### Examples
+    
+    **Case #1 - Valid Dialogue:**
+    Dialogue: "Good afternoon, I'm interested in cleaning services." "Hello, our company offers comprehensive cleaning solutions. Please tell us more about what you're looking for."
+    Output: [{"role": "client", "text": "Good afternoon, I'm interested in cleaning services."}, {"role": "manager", "text": "Hello, our company offers comprehensive cleaning solutions. Please tell us more about what you're looking for."}]
+    
+    **Case #2 - Invalid Example:**
+    Dialogue: "beep" 
+    Output: {"status": "invalid", "reason": "This appears to be a system beep sound, not a human conversation"}
+    
+    **Case #3 - Format Example (what NOT to do):**
+    ❌ WRONG: [\n  {"role": "client", "text": "text"},\n  {"role": "manager", "text": "text"}\n]
+    ✅ CORRECT: [{"role": "client", "text": "text"}, {"role": "manager", "text": "text"}]
+    
+    ### Important
+    - ALWAYS perform the validation check first
+    - Only proceed with segmentation if the text is confirmed as valid human dialogue
+    - Output MUST be clean, valid JSON without extra formatting characters
+    - Ensure no trailing commas in arrays or objects
+    - Replace <DIALOGUE_PLACEHOLDER> with your real dialogue
 """
-MAKING_STRUCTURE_USER_PROMPT: Final[str] = "Provide the segmented version of the following dialogue in the specified JSON format: {text}."
+
+MAKING_STRUCTURE_USER_PROMPT: Final[str] = (
+    "Analyze the following text and provide the segmented version if it's a valid dialogue."
+    "Output MUST be clean JSON without extra formatting characters: {text}"
+)
 
 MAKING_ANALYZES_SYSTEM_PROMPT: Final[str] = """
         You are a professional conversation quality analyst for a call center. Your expertise is analyzing sales and service calls against predefined scripts. 
