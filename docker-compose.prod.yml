@@ -11,5 +11,15 @@ services:
       - ./:/app
       - ./:/app/logs
 
+  queue:
+    container_name: queue
+    restart: always
+    command: bash ./queue_start.sh
+    env_file:
+      - $REMOTE_PROJECT_DIR/..env
+    build:
+      dockerfile: Dockerfile_queue
+      context: .
+
 volumes:
     backend:
