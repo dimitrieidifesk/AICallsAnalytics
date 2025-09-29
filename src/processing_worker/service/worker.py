@@ -1,6 +1,8 @@
 import json
+import time
 import uuid
 
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions import ExceptionProcessingCallSession
@@ -80,9 +82,12 @@ class CallSessionProcessingWorker:
             self.call_session_id, {"status": CallSessionStatus.IN_PROCESSING}
         )
         try:
+            start_time = time.time()
             text_from_audio = await self.get_text_from_audio(call_session)
             structure_text = await self.structure_text_to_dict(text_from_audio)
             await self.get_analytical_for_structure_text(structure_text, call_session.script)
+            end_time = time.time()
+            logger.info(f"Processing time: {end_time - start_time} seconds")
         except Exception as e:
             raise ExceptionProcessingCallSession(str(e))
         else:
