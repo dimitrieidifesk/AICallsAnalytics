@@ -8,8 +8,7 @@ services:
     env_file:
       - $REMOTE_PROJECT_DIR/..env
     volumes:
-      - ./:/app
-      - ./:/app/logs
+      - ./logs:/app/logs
 
   queue:
     container_name: queue
@@ -21,7 +20,7 @@ services:
       dockerfile: Dockerfile_queue
       context: .
     volumes:
-      - ./:/app/logs
+      - ./logs:/app/logs
 
 volumes:
     backend:

@@ -12,6 +12,7 @@ services:
       - "8000:8000"
     volumes:
       - ./:/app
+      - ./logs:/app/logs
     depends_on:
       db:
         condition: service_healthy
@@ -53,7 +54,10 @@ services:
     build:
       dockerfile: Dockerfile_queue
       context: .
+    volumes:
+      - ./logs:/app/logs
 
 volumes:
   backend:
   db:
+  queue:
