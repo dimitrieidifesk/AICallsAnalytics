@@ -41,7 +41,6 @@ class CallSessionProcessingWorker:
     async def structure_text_to_dict(self, text: str) -> dict[str, str] | None:
         try:
             data = await self._open_ai_service.structure_text_with_chatgpt(text)
-            logger.info(data)
             structure_text = json.loads(data["choices"][0]["message"]["content"])
             if isinstance(structure_text, dict) and structure_text.get("status") == "invalid":
                 logger.info(structure_text)

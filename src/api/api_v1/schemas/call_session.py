@@ -71,7 +71,7 @@ class LeadQualitySchema(BaseSchema):
 
 class CityAskedSchema(BaseSchema):
     was_asked_or_mentioned: bool
-    client_city: str
+    client_city: str | None
 
 
 class UnscriptedObjectionSchema(BaseSchema):

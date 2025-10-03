@@ -51,13 +51,14 @@ class OpenAIService:
                     proxy=self.proxy_url,
                     ssl=False
                 ) as response:
+                    result = await response.json()
                     if response.status != 200:
-                        error_text = f"Whisper failed: {response.status}"
+                        error_text = f"Whisper failed: {response.status} | | {result}"
                         await self._processing_log_repo.update(processing_log.id, {"response": error_text})
                         logger.error(error_text)
                         raise ExceptionOpenAiFailed(error_text)
 
-                    result = await response.json()
+
                     await self._processing_log_repo.update(processing_log.id, {"response": json.dumps(result)})
 
                     return result.get('text', '')
