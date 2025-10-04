@@ -2,6 +2,15 @@ import asyncio
 
 from loguru import logger
 
+import os
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+os.chdir(PROJECT_ROOT)
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from src.core.config import settings
 from src.processing_worker.queue import run_in_process_pool
 

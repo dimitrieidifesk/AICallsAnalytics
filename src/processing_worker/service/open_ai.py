@@ -26,7 +26,7 @@ from src.storage.repositories.processing_log import ProcessingLogRepository
 class OpenAIService:
     def __init__(self, audio_url: HttpUrl, session: AsyncSession, call_session_id: uuid.UUID):
         self._call_session_id = call_session_id
-        self.proxy_url = str(settings.open_ai.proxy_url)
+        self.proxy_url = str(settings.open_ai.proxy_url) if settings.open_ai.proxy_url else None
         self._audio_service = AudioService(str(audio_url))
         self._processing_log_repo = ProcessingLogRepository(session)
         self._headers = {"Authorization": f"Bearer {settings.open_ai.api_key}"}
