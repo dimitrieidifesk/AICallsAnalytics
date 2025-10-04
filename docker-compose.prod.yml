@@ -1,0 +1,27 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: bash ./start.sh
+    env_file:
+      - $REMOTE_PROJECT_DIR/..env
+    volumes:
+      - ./logs:/app/logs
+
+  queue:
+    container_name: queue
+    restart: always
+    command: bash ./queue_start.sh
+    env_file:
+      - $REMOTE_PROJECT_DIR/..env
+    build:
+      dockerfile: Dockerfile_queue
+      context: .
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+    backend:
+    queue:

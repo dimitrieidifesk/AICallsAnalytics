@@ -1,0 +1,72 @@
+import uuid
+from typing import Any
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.api.api_v1.schemas.call_session import (
+    CallSessionCreateSchema,
+    CallSessionAnalysisResponseSchema,
+    TranscriptionCallSessionResponseSchema,
+    CallSessionCreateResponseSchema, AnalysisResponseSchema, MetadataSchema
+)
+from src.core.exceptions import ExceptionCallSessionNotFound, ExceptionCallSessionStatus
+from src.integrations.broker.rabbit_broker import broker
+from src.integrations.broker.schemas import CallSessionProcessingSchema
+from src.storage.models.enums import CallSessionStatus, QueueAction
+from src.storage.repositories.call_session import CallSessionRepository
+
+
+class CallSessionService:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+        self._repository = CallSessionRepository(self.session)
+
+    async def create_new_call_session(self, data: CallSessionCreateSchema) -> CallSessionCreateResponseSchema:
+        data_dict: dict[str, Any] = data.call.model_dump()
+        data_dict["script"] = data.script.model_dump()
+        data_dict["recording_url"] = str(data.call.recording_url)
+        call_session = await self._repository.create(data_dict)
+        await broker.publish(
+            CallSessionProcessingSchema(call_session_id=call_session.id, action=QueueAction.CREATE)
+        )
+
+        return CallSessionCreateResponseSchema(call_session_id=call_session.id)
+
+    async def get_call_session_analysis(self, call_session_id: uuid.UUID) -> CallSessionAnalysisResponseSchema:
+        call_session = await self._repository.get_call_session_by_id(call_session_id)
+        if not call_session:
+            raise ExceptionCallSessionNotFound
+
+        if call_session.status != CallSessionStatus.PROCESSING_COMPLETED:
+            raise ExceptionCallSessionStatus(call_session.status)
+
+        return CallSessionAnalysisResponseSchema(
+            session_id=call_session.session_id,
+            analysis=AnalysisResponseSchema(**call_session.analysis.get("data")),
+            metadata=MetadataSchema(processed_at=call_session.created_at)
+        )
+
+    async def get_call_session_transcription(self, call_session_id: uuid.UUID) -> TranscriptionCallSessionResponseSchema:
+        call_session = await self._repository.get_call_session_by_id(call_session_id)
+        if not call_session:
+            raise ExceptionCallSessionNotFound
+
+        if (
+                call_session.transcription or
+                call_session.status == CallSessionStatus.PROCESSING_COMPLETED
+        ):
+            return TranscriptionCallSessionResponseSchema(transcription=call_session.transcription.get("data"))
+        else:
+            raise ExceptionCallSessionStatus(call_session.status)
+
+    async def finish_processing_call_session_by_status(self, call_session_id: uuid.UUID) -> None:
+        call_session = await self._repository.get_call_session_by_id(call_session_id)
+        if not call_session:
+            raise ExceptionCallSessionNotFound
+
+        if call_session.status == CallSessionStatus.PROCESSING_COMPLETED:
+            raise ExceptionCallSessionStatus(call_session.status)
+
+        await broker.publish(
+            CallSessionProcessingSchema(call_session_id=call_session.id, action=QueueAction.UPDATE)
+        )
