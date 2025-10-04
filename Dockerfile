@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
 COPY pyproject.toml poetry.lock ./
 
 RUN pip install poetry --break-system-packages && \
