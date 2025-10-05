@@ -31,7 +31,6 @@ aiohttp = "^3.12.15"
 aiormq = "^6.9.0"
 faststream = {extras = ["rabbit"], version = "^0.5.48"}
 
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

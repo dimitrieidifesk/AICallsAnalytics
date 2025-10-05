@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 
 from pydantic import HttpUrl
+from pydantic import field_validator
 
 from src.api.api_v1.schemas.base import BaseSchema
 from src.core.config import settings
@@ -24,6 +25,12 @@ class ObjectionResponseSchema(BaseSchema):
     title: str
     compliance_percentage: int
     client_raised: bool
+    
+    @field_validator("compliance_percentage", mode="before")
+    def validate_compliance_percentage(cls, value):
+        if isinstance(value, float):
+            return int(value)
+        return value
 
 
 class StageRequestSchema(BaseSchema):
@@ -31,6 +38,7 @@ class StageRequestSchema(BaseSchema):
     title: str
     text: str
     objections: list[ObjectionRequestSchema]
+    
 
 
 class StageResponseSchema(BaseSchema):
@@ -38,6 +46,12 @@ class StageResponseSchema(BaseSchema):
     title: str
     compliance_percentage: int
     objections: list[ObjectionResponseSchema]
+    
+    @field_validator("compliance_percentage", mode="before")
+    def validate_compliance_percentage(cls, value):
+        if isinstance(value, float):
+            return int(value)
+        return value
 
 
 class ScriptSchema(BaseSchema):
@@ -57,6 +71,12 @@ class CallSessionCreateResponseSchema(BaseSchema):
 class ScriptComplianceSchema(BaseSchema):
     overall_percentage: int
     stages: list[StageResponseSchema]
+    
+    @field_validator("overall_percentage", mode="before")
+    def validate_overall_percentage(cls, value):
+        if isinstance(value, float):
+            return int(value)
+        return value
 
 
 class ClientUncertaintySchema(BaseSchema):

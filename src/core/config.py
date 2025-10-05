@@ -101,7 +101,7 @@ class OpenAiConfig(BaseModel):
     chat_path: str
     whisper_model: str
     chat_model: str
-    proxy_url: HttpUrl
+    proxy_url: HttpUrl | None = None
     language_code: str = "ru"
 
     @property
