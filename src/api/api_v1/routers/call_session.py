@@ -24,6 +24,16 @@ async def create_call_session(
     return await service.create_new_call_session(data)
 
 
+@router.get("/analysis/by_session_id/{session_id}")
+async def get_call_session_analysis(
+    _: VerifyUser,
+    session_id: str,
+    service: CallSessionServiceDep,
+) -> CallSessionAnalysisResponseSchema:
+
+    return await service.get_call_session_analysis_by_session_id(session_id)
+
+
 @router.get("/analysis/{call_session_id}")
 async def get_call_session_analysis(
     _: VerifyUser,

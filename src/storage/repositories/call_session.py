@@ -40,6 +40,15 @@ class CallSessionRepository(BaseRepository[CallSession]):
 
         return res.scalar()
 
+    async def get_call_session_by_session_id(self, session_id: str) -> CallSession:
+        query = (
+            select(self.model)
+            .where(self.model.session_id == session_id)
+        )
+        res = await self.session.execute(query)
+
+        return res.scalar()
+
     async def update(
         self, call_session_id: uuid.UUID, data: dict[str, Any]
     ):

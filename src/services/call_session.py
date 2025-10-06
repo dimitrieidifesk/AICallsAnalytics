@@ -32,6 +32,20 @@ class CallSessionService:
 
         return CallSessionCreateResponseSchema(call_session_id=call_session.id)
 
+    async def get_call_session_analysis_by_session_id(self, session_id: str) -> CallSessionAnalysisResponseSchema:
+        call_session = await self._repository.get_call_session_by_session_id(session_id)
+        if not call_session:
+            raise ExceptionCallSessionNotFound
+
+        if call_session.status != CallSessionStatus.PROCESSING_COMPLETED:
+            raise ExceptionCallSessionStatus(call_session.status)
+
+        return CallSessionAnalysisResponseSchema(
+            session_id=call_session.session_id,
+            analysis=AnalysisResponseSchema(**call_session.analysis.get("data")),
+            metadata=MetadataSchema(processed_at=call_session.created_at)
+        )
+
     async def get_call_session_analysis(self, call_session_id: uuid.UUID) -> CallSessionAnalysisResponseSchema:
         call_session = await self._repository.get_call_session_by_id(call_session_id)
         if not call_session:
