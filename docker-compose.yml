@@ -1,6 +1,6 @@
 services:
-  backend:
-    container_name: backend
+  ai-analytics-backend:
+    container_name: ai-analytics-backend
     build:
       context: .
       dockerfile: Dockerfile
