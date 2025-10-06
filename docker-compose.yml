@@ -24,8 +24,10 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: $APP_CONFIG__RABBIT__USER
+      RABBITMQ_DEFAULT_PASS: $APP_CONFIG__RABBIT__PASSWORD
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
 
   db:
     container_name: db
@@ -34,9 +36,9 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: base_db
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
     ports:
       - "5432:5432"
     healthcheck:
@@ -44,6 +46,8 @@ services:
       interval: 5s
       timeout: 10s
       retries: 5
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
   queue:
     container_name: queue
@@ -59,5 +63,6 @@ services:
 
 volumes:
   backend:
-  db:
   queue:
+  db_data:
+  rabbit_data:
