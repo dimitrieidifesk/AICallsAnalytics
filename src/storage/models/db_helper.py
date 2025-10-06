@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from src.core.config import settings
+from loguru import logger
 
 
 class DatabaseConnector:
@@ -20,6 +21,8 @@ class DatabaseConnector:
         pool_size: int = 5,
         max_overflow: int = 10,
     ) -> None:
+        self.url = url
+        logger.info(f"Database URL: {self.url}")
         self.engine: AsyncEngine = create_async_engine(
             url=url,
             echo=echo,
@@ -38,6 +41,7 @@ class DatabaseConnector:
         await self.engine.dispose()
 
     async def session_getter(self) -> AsyncGenerator[AsyncSession, None]:
+        logger.info(f"Database URL: {self.url}")
         async with self.session_factory() as session:
             yield session
 
