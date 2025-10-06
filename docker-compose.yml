@@ -16,6 +16,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - contact_center_network
 
   rabbitmq:
     image: rabbitmq:management
@@ -66,3 +68,8 @@ volumes:
   queue:
   db_data:
   rabbit_data:
+
+networks:
+  contact_center_network:
+    external: true
+    name: ncc_v20_contact_center_network
