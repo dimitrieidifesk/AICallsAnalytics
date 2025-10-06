@@ -22,7 +22,6 @@ class DatabaseConnector:
         max_overflow: int = 10,
     ) -> None:
         self.url = url
-        logger.info(f"Database URL: {self.url}")
         self.engine: AsyncEngine = create_async_engine(
             url=url,
             echo=echo,
@@ -41,7 +40,6 @@ class DatabaseConnector:
         await self.engine.dispose()
 
     async def session_getter(self) -> AsyncGenerator[AsyncSession, None]:
-        logger.info(f"Database URL: {self.url}")
         async with self.session_factory() as session:
             yield session
 
