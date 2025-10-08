@@ -1,3 +1,4 @@
+import asyncio
 import json
 import time
 import uuid
@@ -23,6 +24,7 @@ class CallSessionProcessingWorker:
     async def get_text_from_audio(self, call_session: CallSession) -> str:
         try:
             text_from_audio = await self._open_ai_service.text_transcription_from_url()
+            await asyncio.sleep(1)
         except Exception as e:
             error_text = f"Text transcription from url {call_session.recording_url} failed! Error: {e}"
             await self._call_session_repo.update(
@@ -41,6 +43,7 @@ class CallSessionProcessingWorker:
     async def structure_text_to_dict(self, text: str) -> dict[str, str] | None:
         try:
             data = await self._open_ai_service.structure_text_with_chatgpt(text)
+            await asyncio.sleep(1)
             structure_text = json.loads(data["choices"][0]["message"]["content"])
             if isinstance(structure_text, dict) and structure_text.get("status") == "invalid":
                 logger.info(structure_text)
@@ -64,6 +67,7 @@ class CallSessionProcessingWorker:
     ) -> None:
         try:
             data = await self._open_ai_service.analyze_structured_text(structure_text, analysis_benchmark)
+            await asyncio.sleep(1)
             result = json.loads(data["choices"][0]["message"]["content"])
         except Exception as e:
             await self._call_session_repo.update(
