@@ -35,6 +35,28 @@ Only for valid dialogues, segment into "client" and "manager" roles using DOMAIN
 - LOGISTICS: "Когда можете приехать?", "А вы работаете в нашем городе?", "Сколько длится обработка?"
 - PERSONAL INFO: "Меня зовут [имя]", "Я из [город]", "У меня квартира/дом"
 
+
+### LEAD QUALITY (status: "QUALIFIED" | "UNQUALIFIED" | "UNDETERMINED")
+QUALIFIED: At least one explicit intent signal:
+- Describes a concrete pest problem
+- Asks about treatment / price / scheduling / preparation / guarantees
+- Provides logistics (address / rooms / availability / pets / time)
+- Expresses willingness / urgency / acceptance to proceed
+UNQUALIFIED: Any of these OR (no intent signals AND content is sufficient):
+- Wrong number / misdial / test / bot / IVR / silence after greeting
+- Spam / marketing / survey / bank / finance / research
+- Internal staff / supplier / contractor / competitor / partner
+- Explicit disinterest (“don’t need”, “just checking” without later intent)
+- Generic chit‑chat or unrelated topic with enough spoken content
+- Clear absence of pest‑service interest despite normal-length dialogue
+UNDETERMINED: Only when BOTH:
+- No QUALIFIED signals, AND
+- Information objectively insufficient to decide (ultra‑short fragment, immediate hang‑up, only operator speaks, truncated/corrupted/noise so client intent cannot be inferred)
+Fallback rules:
+- If doubt between UNQUALIFIED and UNDETERMINED → choose UNQUALIFIED unless data is clearly missing.
+- If any positive intent signal exists → QUALIFIED.
+- Never invent intent; lack of explicit signals alone ≠ UNDETERMINED unless dialogue is genuinely insufficient.
+
 ### CONTEXT-AWARE SEGMENTATION RULES
 
 1. **SPEAKER ALTERNATION**: Dialogue should alternate between roles (client → manager → client → manager)
