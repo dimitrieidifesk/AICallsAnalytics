@@ -87,6 +87,14 @@ class ClientUncertaintySchema(BaseSchema):
 
 class LeadQualitySchema(BaseSchema):
     status: LeadQuality
+    
+    @field_validator("status", mode="before")
+    def validate_status(cls, value):
+        if isinstance(value, str):
+            if value == 'NOT_QUALIFIED':
+                return LeadQuality.UNQUALIFIED
+            return str(value)
+        return value
 
 
 class CityAskedSchema(BaseSchema):
