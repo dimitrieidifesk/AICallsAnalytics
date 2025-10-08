@@ -19,7 +19,7 @@ services:
     networks:
       - contact_center_network
 
-  rabbitmq:
+  ai-analytics-rabbitmq:
     image: rabbitmq:management
     container_name: ai-analytics-rabbitmq
     restart: "unless-stopped"
@@ -34,7 +34,7 @@ services:
     networks:
       - contact_center_network
 
-  db:
+  ai-analytics-db:
     container_name: ai-analytics-db
     restart: "unless-stopped"
     image: postgres
@@ -57,7 +57,7 @@ services:
     networks:
       - contact_center_network
 
-  queue:
+  ai-analytics-queue:
     container_name: ai-analytics-queue
     restart: "unless-stopped"
     command: bash ./queue_start.sh
