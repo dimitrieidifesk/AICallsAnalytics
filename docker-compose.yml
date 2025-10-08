@@ -14,7 +14,7 @@ services:
       - ./:/app
       - ./logs:/app/logs
     depends_on:
-      db:
+      ai-analytics-db:
         condition: service_healthy
     networks:
       - contact_center_network
