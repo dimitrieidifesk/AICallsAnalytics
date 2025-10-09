@@ -42,20 +42,23 @@ QUALIFIED: At least one explicit intent signal:
 - Asks about treatment / price / scheduling / preparation / guarantees
 - Provides logistics (address / rooms / availability / pets / time)
 - Expresses willingness / urgency / acceptance to proceed
-UNQUALIFIED: Any of these OR (no intent signals AND content is sufficient):
+- Client discusses pest service but shows hesitation, doubt, says "not interested now", "will think about it", "too expensive"
+- Any real client interaction about pest service (even with rejection or postponement)
+- The client says he is no longer interested in the treatment, but the disinfection issue is being discussed.
+UNQUALIFIED: Non-target caller, impossible to convert:
 - Wrong number / misdial / test / bot / IVR / silence after greeting
-- Spam / marketing / survey / bank / finance / research
+- Spam / marketing / survey / bank / finance / research / political calls
 - Internal staff / supplier / contractor / competitor / partner
-- Explicit disinterest (“don’t need”, “just checking” without later intent)
-- Generic chit‑chat or unrelated topic with enough spoken content
-- Clear absence of pest‑service interest despite normal-length dialogue
+- Completely unrelated topic with no pest service discussion whatsoever
+- Explicit wrong number or accidental dial
 UNDETERMINED: Only when BOTH:
 - No QUALIFIED signals, AND
 - Information objectively insufficient to decide (ultra‑short fragment, immediate hang‑up, only operator speaks, truncated/corrupted/noise so client intent cannot be inferred)
 Fallback rules:
-- If doubt between UNQUALIFIED and UNDETERMINED → choose UNQUALIFIED unless data is clearly missing.
-- If any positive intent signal exists → QUALIFIED.
-- Never invent intent; lack of explicit signals alone ≠ UNDETERMINED unless dialogue is genuinely insufficient.
+- If ANY pest-service discussion occurs → QUALIFIED (never UNQUALIFIED)
+- If doubt between UNQUALIFIED and UNDETERMINED → choose UNQUALIFIED unless data is clearly missing
+- Use UNQUALIFIED only for clearly non-target callers with zero pest service context
+- Never invent intent; analyze only what is explicitly stated
 
 ### CONTEXT-AWARE SEGMENTATION RULES
 
