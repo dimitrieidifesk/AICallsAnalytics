@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+from loguru import logger
 from pydantic import HttpUrl
 from pydantic import field_validator
 
@@ -83,6 +84,13 @@ class ClientUncertaintySchema(BaseSchema):
     detected: bool
     resolved_by_operator: bool
     comment: str
+    
+    @field_validator("resolved_by_operator", mode="before")
+    def validate_resolved_by_operator(cls, value):
+        if not isinstance(value, bool) and value is not None:
+            logger.error(f"Invalid value for resolved_by_operator: {value}")
+            return False
+        return value if value is not None else False
 
 
 class LeadQualitySchema(BaseSchema):
