@@ -99,8 +99,10 @@ class LeadQualitySchema(BaseSchema):
     @field_validator("status", mode="before")
     def validate_status(cls, value):
         if isinstance(value, str):
-            if value == 'NOT_QUALIFIED':
+            if value == 'NOT_QUALIFIED' or value == 'NOT QUALIFIED':
                 return LeadQuality.UNQUALIFIED
+            if value not in ("QUALIFIED", "UNQUALIFIED", "UNDETERMINED"):
+                return "UNDETERMINED"
             return str(value)
         return value
 
